@@ -21,7 +21,7 @@ provides=("scantailor")
 conflicts=("scantailor-advanced-git")
 # source=("$pkgname-$pkgver.tar.xz::https://f002.backblazeb2.com/file/AUR-Store/$pkgname/scantailor-advanced-git-$pkgver.$arch.tar.xz")
 source=("$pkgname-$pkgver.tar.gz::https://github.com/arch-noob/scantailor-advanced-bin/releases/download/$pkgver/scantailor-advanced-$pkgver.tar.gz")
-sha256sums=('SKIP')
+sha256sums=('9b39cfeac128ad5cfeff8a7026007c3f570f9f75cce0b25bf04e2ef9e5583a38')
 
 package() {
   cd $srcdir

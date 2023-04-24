@@ -52,6 +52,8 @@ jobs:
           git checkout tags/v1.0.18
           mkdir dist
           mkdir build && cd build
+          export LDFLAGS="-L/usr/local/lib,--rpath=/usr/local/lib"
+          export LD_LIBRARY_PATH="/usr/local/lib"
           cmake -G "Unix Makefiles" ..
           make -j2
           make DESTDIR="../dist" install
