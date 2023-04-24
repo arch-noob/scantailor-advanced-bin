@@ -1,8 +1,8 @@
 pkgbase = scantailor-advanced-bin
 	pkgdesc = Interactive post-processing tool for scanned pages that merges the features of the ScanTailor Featured and ScanTailor Enhanced versions, brings new ones and fixes.
-	pkgver = v1.0.16.r119
-	pkgrel = 1
-	url = https://github.com/4lex4/scantailor-advanced
+	pkgver = v1.0.18
+	pkgrel = 3
+	url = https://github.com/ScanTailor-Advanced/scantailor-advanced
 	arch = x86_64
 	license = GPL3
 	depends = boost-libs
@@ -13,8 +13,7 @@ pkgbase = scantailor-advanced-bin
 	depends = zlib
 	provides = scantailor
 	conflicts = scantailor-advanced-git
-	source = scantailor-advanced-bin-v1.0.16.r119.tar.xz::https://f002.backblazeb2.com/file/AUR-Store/scantailor-advanced-bin/scantailor-advanced-git-v1.0.16.r119.x86_64.tar.xz
-	sha256sums = 1d8590cc2a35b13260d378bcb87fe136d00d2425ad2a945d2200a02d7328206b
+	source = scantailor-advanced-bin-v1.0.18.tar.gz::https://github.com/arch-noob/scantailor-advanced-bin/releases/download/v1.0.18/scantailor-advanced-v1.0.18.tar.gz
+	sha256sums = SKIP
 
 pkgname = scantailor-advanced-bin
-

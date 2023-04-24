@@ -1,0 +1,77 @@
+name: Build
+
+on:
+  push:
+    tags:
+      - v**
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # env:
+    #   REPO_NAME: ${{ github.event.repository.name }}
+    steps:
+      # - name: Dump github context
+      #   run: echo "$GITHUB_CONTEXT"
+      #   shell: bash
+      #   env:
+      #     GITHUB_CONTEXT: ${{ toJson(github) }}
+      # - name: Checkout this one
+      #   uses: actions/checkout@v3
+
+      - name: Checkout ScanTailor-Advanced
+        uses: GuillaumeFalourd/clone-github-repo-action@v2
+        with:
+          owner: ScanTailor-Advanced
+          repository: scantailor-advanced
+
+      # Install latest CMake and Ninja.
+      # - uses: lukka/get-cmake@latest
+      # Or pin to a specific CMake version:
+      # lukka/get-cmake@v3.21.2
+      # - name: Run CMake consuming CMakePresets.json and vcpkg.json by mean of vcpkg.
+      #   uses: lukka/run-cmake@v10
+      #   with:
+      #     cmakeListsTxtPath: "${{ github.workspace }}/scantailor-advanced/CMakeLists.txt"
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v1.14
+      # with:
+      # cmake-version: "3.16.x"
+      - name: Install APT packages
+        # uses: awalsh128/cache-apt-pkgs-action@v1
+        # with:
+        #   version: 1.0
+        #   packages: libboost-all-dev qtbase5-dev libqt5svg5-dev qttools5-dev qttools5-dev-tools build-essential python3-dev g++ autotools-dev libicu-dev libbz2-dev
+        run: |
+          sudo apt update
+          sudo apt install git libboost-all-dev qtbase5-dev libqt5svg5-dev qttools5-dev qttools5-dev-tools build-essential python3-dev g++ autotools-dev libicu-dev libbz2-dev -y
+
+      - name: Build
+        run: |
+          cd scantailor-advanced
+          git checkout tags/v1.0.18
+          mkdir dist
+          mkdir build && cd build
+          cmake -G "Unix Makefiles" ..
+          make -j2
+          make DESTDIR="../dist" install
+
+      - name: Compress action step
+        uses: a7ul/tar-action@v1.1.0
+        with:
+          command: c
+          cwd: scantailor-advanced/dist
+          files: ./
+          outPath: scantailor-advanced-v1.0.18.tar.gz
+
+      # - name: List files
+      #   run: |
+      #     ls -la
+      #     ls scantailor-advanced -la
+      #     ls scantailor-advanced/dist -la
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: scantailor-advanced-v1.0.18.tar.gz
