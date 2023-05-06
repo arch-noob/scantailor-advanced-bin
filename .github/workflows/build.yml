@@ -27,6 +27,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y cmake build-essential libboost-all-dev qtbase5-dev libqt5svg5-dev qttools5-dev qttools5-dev-tools python3-dev autotools-dev libicu-dev
 
+      - uses: rui314/setup-mold@v1
+
       - name: Build
         run: |
           cd scantailor-advanced
@@ -41,7 +43,7 @@ jobs:
       - name: Compress binary
         run: |
           cd scantailor-advanced/dist
-          tar czvf ../../scantailor-advanced-bin.tar.gz ./usr
+          tar czvf scantailor-advanced-bin.tar.gz ./usr
 
       # - name: Create GitHub Release
       #   id: create_release
