@@ -37,13 +37,14 @@ jobs:
           export LDFLAGS="-L/usr/local/lib,--rpath=/usr/local/lib"
           export LD_LIBRARY_PATH="/usr/local/lib"
           cmake -G "Unix Makefiles" ..
-          make -j$(($(nproc)-1))
+          make -j$(nproc)
           make DESTDIR="../dist" install
 
       - name: Compress binary
         run: |
           cd scantailor-advanced/dist
           tar czvf scantailor-advanced-bin.tar.gz ./usr
+          ls
 
       # - name: Create GitHub Release
       #   id: create_release
@@ -57,7 +58,6 @@ jobs:
       #     prerelease: false
       #     replace_artifacts: true
       #     allow_updates: true
-
       # - name: Upload binary as release asset
       #   uses: actions/upload-release-asset@v1
       #   # env:
@@ -67,13 +67,14 @@ jobs:
       #     asset_path: scantailor-advanced-bin.tar.gz
       #     asset_name: scantailor-advanced-bin.tar.gz
       #     asset_content_type: application/gzip
-
       - name: Release
+        # run: |
+        #   ls -a
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         with:
-          files: scantailor-advanced-bin.tar.gz
+          files: scantailor-advanced/dist/scantailor-advanced-bin.tar.gz
           name: Release ${{ github.ref }}
           draft: true
