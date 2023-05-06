@@ -72,8 +72,8 @@ jobs:
         #   ls -a
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+        # env:
+        #   GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         with:
           files: scantailor-advanced/dist/scantailor-advanced-bin.tar.gz
           name: Release ${{ github.ref }}
