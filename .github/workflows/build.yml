@@ -1,79 +1,77 @@
-name: Build
+name: Build Linux Binary from Public External Repo with CMake and Create Release
 
 on:
   push:
     tags:
-      - v**
+      - "v*"
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    # env:
-    #   REPO_NAME: ${{ github.event.repository.name }}
+    permissions:
+      contents: write
+
     steps:
-      # - name: Dump github context
-      #   run: echo "$GITHUB_CONTEXT"
-      #   shell: bash
-      #   env:
-      #     GITHUB_CONTEXT: ${{ toJson(github) }}
-      # - name: Checkout this one
-      #   uses: actions/checkout@v3
-
-      - name: Checkout ScanTailor-Advanced
-        uses: GuillaumeFalourd/clone-github-repo-action@v2
+      - name: Checkout public external repository
+        uses: actions/checkout@v3
+        # env:
+        #   GITHUB_REPOSITORY: "ScanTailor-Advanced/scantailor-advanced"
         with:
-          owner: ScanTailor-Advanced
-          repository: scantailor-advanced
+          repository: "ScanTailor-Advanced/scantailor-advanced"
+          ref: ${{ github.ref }}
+          # token: ${{ env.GH_PAT }}
+          path: scantailor-advanced
 
-      # Install latest CMake and Ninja.
-      # - uses: lukka/get-cmake@latest
-      # Or pin to a specific CMake version:
-      # lukka/get-cmake@v3.21.2
-      # - name: Run CMake consuming CMakePresets.json and vcpkg.json by mean of vcpkg.
-      #   uses: lukka/run-cmake@v10
-      #   with:
-      #     cmakeListsTxtPath: "${{ github.workspace }}/scantailor-advanced/CMakeLists.txt"
-      - name: Setup cmake
-        uses: jwlawson/actions-setup-cmake@v1.14
-      # with:
-      # cmake-version: "3.16.x"
-      - name: Install APT packages
-        # uses: awalsh128/cache-apt-pkgs-action@v1
-        # with:
-        #   version: 1.0
-        #   packages: libboost-all-dev qtbase5-dev libqt5svg5-dev qttools5-dev qttools5-dev-tools build-essential python3-dev g++ autotools-dev libicu-dev libbz2-dev
+      - name: Set up CMake, GCC and Make
         run: |
-          sudo apt update
-          sudo apt install git libboost-all-dev qtbase5-dev libqt5svg5-dev qttools5-dev qttools5-dev-tools build-essential python3-dev g++ autotools-dev libicu-dev libbz2-dev -y
+          sudo apt-get update
+          sudo apt-get install -y cmake build-essential libboost-all-dev qtbase5-dev libqt5svg5-dev qttools5-dev qttools5-dev-tools python3-dev autotools-dev libicu-dev
 
       - name: Build
         run: |
           cd scantailor-advanced
-          git checkout tags/v1.0.18
           mkdir dist
           mkdir build && cd build
           export LDFLAGS="-L/usr/local/lib,--rpath=/usr/local/lib"
           export LD_LIBRARY_PATH="/usr/local/lib"
           cmake -G "Unix Makefiles" ..
-          make -j2
+          make -j$(($(nproc)-1))
           make DESTDIR="../dist" install
 
-      - name: Compress action step
-        uses: a7ul/tar-action@v1.1.0
-        with:
-          command: c
-          cwd: scantailor-advanced/dist
-          files: ./
-          outPath: scantailor-advanced-v1.0.18.tar.gz
+      - name: Compress binary
+        run: |
+          cd scantailor-advanced/dist
+          tar czvf ../../scantailor-advanced-bin.tar.gz ./usr
 
-      # - name: List files
-      #   run: |
-      #     ls -la
-      #     ls scantailor-advanced -la
-      #     ls scantailor-advanced/dist -la
+      # - name: Create GitHub Release
+      #   id: create_release
+      #   uses: actions/create-release@v1
+      #   # env:
+      #   #   GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+      #   with:
+      #     tag_name: ${{ github.ref }}
+      #     release_name: Release ${{ github.ref }}
+      #     draft: false
+      #     prerelease: false
+      #     replace_artifacts: true
+      #     allow_updates: true
+
+      # - name: Upload binary as release asset
+      #   uses: actions/upload-release-asset@v1
+      #   # env:
+      #   #   GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: scantailor-advanced-bin.tar.gz
+      #     asset_name: scantailor-advanced-bin.tar.gz
+      #     asset_content_type: application/gzip
 
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         with:
-          files: scantailor-advanced-v1.0.18.tar.gz
+          files: scantailor-advanced-bin.tar.gz
+          name: Release ${{ github.ref }}
+          draft: true
