@@ -1,15 +1,16 @@
-name: Build Linux Binary from Public External Repo with CMake and Create Release
+name: Build Linux Binary from Source and Release
 
 on:
   push:
     tags:
       - "v*"
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
     steps:
       - name: Checkout public external repository
@@ -22,13 +23,13 @@ jobs:
           # token: ${{ env.GH_PAT }}
           path: scantailor-advanced
 
-      - name: Set up CMake, GCC and Make
+      - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y cmake build-essential libboost-all-dev qtbase5-dev libqt5svg5-dev qttools5-dev qttools5-dev-tools python3-dev autotools-dev libicu-dev
 
       - uses: rui314/setup-mold@v1
-        name: Set up Mold linker
+        name: Install Mold linker
 
       - name: Build
         run: |
@@ -41,10 +42,10 @@ jobs:
           make -j$(nproc)
           make DESTDIR="../dist" install
 
-      - name: Compress binary
+      - name: Compress
         run: |
           cd scantailor-advanced/dist
-          tar czvf scantailor-advanced-bin.tar.gz ./usr
+          tar czvf ../../scantailor-advanced-bin.tar.gz usr/
 
       # - name: Create GitHub Release
       #   id: create_release
@@ -75,6 +76,6 @@ jobs:
         # env:
         #   GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         with:
-          files: scantailor-advanced/dist/scantailor-advanced-bin.tar.gz
-          name: Release ${{ github.ref }}
+          files: scantailor-advanced-bin.tar.gz
+          name: Release ${{ github.ref_name }}
           draft: true
