@@ -78,4 +78,4 @@ jobs:
         with:
           files: scantailor-advanced-bin.tar.gz
           name: Release ${{ github.ref_name }}
-          draft: true
+          # draft: true
